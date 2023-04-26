@@ -1,0 +1,114 @@
+buildscript {
+	repositories {
+		gradlePluginPortal()
+	}
+	dependencies {
+		classpath 'com.modrinth.minotaur:Minotaur:2.4.3'
+		classpath "com.github.breadmoirai:github-release:2.4.1"
+	}
+}
+
+plugins {
+	id 'maven-publish'
+	alias libs.plugins.loom
+}
+
+if (System.getenv("MODRINTH_TOKEN")) {
+	apply plugin: "com.modrinth.minotaur"
+}
+if (System.getenv("GITHUB_TOKEN")) {
+	apply plugin: "com.github.breadmoirai.github-release"
+}
+
+archivesBaseName = project.archives_base_name
+
+def mc_major = '1.19'
+def nbt_crafting = '2'
+def mc = mc_major + '.2'
+def default_branch = '1.19'
+
+def origVersion = project.version
+project.version = project.version + "+" + mc
+group = project.maven_group
+
+repositories {
+}
+
+dependencies {
+	// // Base // //
+	minecraft libs.minecraft
+	mappings variantOf(libs.qm) { classifier "intermediary-v2" }
+	modImplementation libs.ql
+	modImplementation libs.qsl
+}
+
+
+processResources {
+	inputs.property "version", version
+
+	filesMatching('quilt.mod.json') {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+	it.options.release = 17
+}
+
+java {
+	withSourcesJar()
+}
+
+jar {
+	from("LICENSE.txt") {
+		rename { "${it}_${archivesBaseName}" }
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+
+	}
+}
+
+if (System.getenv("MODRINTH_TOKEN")) {
+	modrinth {
+		token = System.getenv("MODRINTH_TOKEN")
+		projectId = 'befu'
+		versionNumber = project.version
+		versionName = origVersion
+		versionType = 'release'
+		uploadFile = remapJar
+		gameVersions = ['1.18.2', '1.19', '1.19.1', '1.19.2', '1.19.3', '1.19.4']
+		loaders = ['quilt']
+		detectLoaders = false
+		dependencies {
+		}
+		changelog = "Changelog: https://github.com/sisby-folk/befu/releases/tag/v" + origVersion
+		syncBodyFrom = rootProject.file("README.md").text
+	}
+}
+
+if (System.getenv("GITHUB_TOKEN")) {
+	githubRelease {
+		token System.getenv("GITHUB_TOKEN")
+		owner "sisby-folk"
+		repo "befu"
+		tagName 'v' + origVersion
+		releaseName origVersion
+		targetCommitish default_branch
+		draft false
+		prerelease false
+		releaseAssets remapJar.archiveFile
+		allowUploadToExisting true
+		generateReleaseNotes true
+	}
+	tasks.githubRelease.dependsOn remapJar
+}

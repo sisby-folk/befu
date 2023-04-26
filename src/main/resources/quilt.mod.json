@@ -1,0 +1,35 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "folk.sisby",
+		"id": "befu",
+		"version": "${version}",
+		"metadata": {
+			"name": "BlockEntity Fixer Upper",
+			"description": "Adds a fallback path for loading unregistered block entities",
+			"contributors": {
+				"Sisby Folk": "Co-Authors"
+			},
+			"contact": {
+				"homepage": "https://modrinth.com/mod/befu",
+				"issues": "https://github.com/sisby-folk/befu/issues",
+				"sources": "https://github.com/sisby-folk/befu"
+			},
+			"icon": "assets/befu/icon.png"
+		},
+		"entrypoints": {
+			"init": ["folk.sisby.befu.BlockEntityFixerUpper"]
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.16.0-"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.18.2"
+			}
+		]
+	}
+}
