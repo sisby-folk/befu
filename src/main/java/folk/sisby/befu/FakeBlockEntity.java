@@ -18,9 +18,7 @@ public class FakeBlockEntity extends BlockEntity {
 
 	public static void tick(World world, BlockPos pos, BlockState state, FakeBlockEntity be) {
 		if (be.storedBlock != null) {
-			world.removeBlockEntity(pos);
-			world.setBlockState(pos, be.storedBlock.getDefaultState());
-			world.updateNeighbors(pos, be.storedBlock);
+			world.setBlockState(pos, be.storedBlock.getStateWithProperties(state));
 			be.storedBlock = null;
 		}
 	}
